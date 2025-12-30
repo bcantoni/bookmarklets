@@ -214,11 +214,19 @@
             font-size: 13px;
             line-height: 1.5;
             resize: vertical;
-            background: #fff;
+            background: transparent;
+            position: relative;
+            z-index: 1;
+            color: transparent;
+            caret-color: #333;
         }
 
         .code-editor:focus {
             outline: none;
+        }
+
+        .code-editor::placeholder {
+            color: #999;
         }
 
         .code-highlight {
@@ -227,6 +235,7 @@
             left: 0;
             right: 0;
             bottom: 0;
+            margin: 0;
             padding: 12px;
             pointer-events: none;
             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
@@ -234,8 +243,17 @@
             line-height: 1.5;
             white-space: pre-wrap;
             word-wrap: break-word;
-            overflow: hidden;
+            overflow: auto;
+            background: #fff;
+            z-index: 0;
+        }
+
+        .code-highlight code {
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
             background: transparent;
+            padding: 0;
         }
 
         .output-textarea {
@@ -439,7 +457,8 @@
                 <div class="field-group">
                     <label for="code">Code</label>
                     <div class="code-editor-wrapper">
-                        <textarea class="code-editor" id="code" placeholder="// Enter your JavaScript code here" oninput="markDirty(); updateHighlight()"></textarea>
+                        <pre class="code-highlight" aria-hidden="true"><code class="language-javascript" id="code-highlight"></code></pre>
+                        <textarea class="code-editor" id="code" placeholder="// Enter your JavaScript code here" oninput="markDirty(); updateHighlight()" onscroll="syncScroll()"></textarea>
                     </div>
                 </div>
 
@@ -594,6 +613,7 @@
             document.getElementById('output').value = bm.output || '';
             updateCharCount();
             updateDragLink(bm.output || '');
+            updateHighlight();
 
             document.getElementById('getting-started').style.display = 'none';
             document.getElementById('editor').classList.add('visible');
@@ -821,6 +841,7 @@
 
             document.getElementById('code').value = result.trim();
             markDirty();
+            updateHighlight();
         }
 
         // Clear code
@@ -832,6 +853,7 @@
             document.getElementById('output').value = '';
             updateCharCount();
             updateDragLink('');
+            updateHighlight();
             markDirty();
         }
 
@@ -993,11 +1015,27 @@
             URL.revokeObjectURL(url);
         }
 
-        // Syntax highlighting (simplified approach)
+        // Syntax highlighting
         function updateHighlight() {
-            // For simplicity, we're using a plain textarea
-            // Full syntax highlighting would require a more complex setup
-            // like CodeMirror or a contenteditable div with highlighting
+            const code = document.getElementById('code').value;
+            const highlightEl = document.getElementById('code-highlight');
+
+            if (!code) {
+                highlightEl.innerHTML = '\n';
+                return;
+            }
+
+            // Use hljs.highlight() to get HTML directly (avoids re-highlight issues)
+            const result = hljs.highlight(code, { language: 'javascript' });
+            highlightEl.innerHTML = result.value + '\n';
+        }
+
+        // Sync scroll between textarea and highlight layer
+        function syncScroll() {
+            const textarea = document.getElementById('code');
+            const highlight = textarea.previousElementSibling;
+            highlight.scrollTop = textarea.scrollTop;
+            highlight.scrollLeft = textarea.scrollLeft;
         }
     </script>
 </body>
