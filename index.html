@@ -248,7 +248,7 @@
             font-size: 12px;
             line-height: 1.4;
             resize: vertical;
-            background: #f9f9f9;
+            background: #fff;
             color: #555;
         }
 
@@ -424,12 +424,13 @@
 
                 <div class="field-group">
                     <label for="output">Output</label>
-                    <textarea class="output-textarea" id="output" readonly placeholder="Click 'Generate Bookmarklet' to see the output"></textarea>
+                    <textarea class="output-textarea" id="output" placeholder="Click 'Generate Bookmarklet' to see the output, or paste a bookmarklet here and click 'Reverse'" oninput="updateCharCount()"></textarea>
                     <div class="char-count" id="char-count">0 characters</div>
                 </div>
 
                 <div class="button-row">
                     <button class="btn btn-primary" onclick="generateBookmarklet()">Generate Bookmarklet</button>
+                    <button class="btn btn-primary" onclick="reverseBookmarklet()">Reverse</button>
                     <button class="btn btn-warning" onclick="runCode()">Run Code</button>
                     <button class="btn btn-secondary" onclick="prettifyCode()">Pretty</button>
                     <button class="btn btn-secondary" onclick="clearCode()">Clear</button>
@@ -647,6 +648,51 @@
             document.getElementById('output').value = encoded;
             updateCharCount();
             updateDragLink(encoded);
+        }
+
+        // Reverse bookmarklet back to code
+        function reverseBookmarklet() {
+            let output = document.getElementById('output').value.trim();
+            if (!output) {
+                alert('Nothing to reverse. Paste a bookmarklet in the Output field first.');
+                return;
+            }
+
+            try {
+                // Remove javascript: prefix
+                if (output.startsWith('javascript:')) {
+                    output = output.slice(11);
+                }
+
+                // URL decode
+                let decoded = decodeURIComponent(output);
+
+                // Unwrap IIFE patterns:
+                // (function(){...})()
+                // (function(){...}())
+                // !function(){...}()
+                // void function(){...}()
+                const iifePatterns = [
+                    /^\(function\(\)\{([\s\S]*)\}\)\(\);?$/,
+                    /^\(function\(\)\{([\s\S]*)\}\(\)\);?$/,
+                    /^!function\(\)\{([\s\S]*)\}\(\);?$/,
+                    /^void function\(\)\{([\s\S]*)\}\(\);?$/
+                ];
+
+                for (const pattern of iifePatterns) {
+                    const match = decoded.match(pattern);
+                    if (match) {
+                        decoded = match[1];
+                        break;
+                    }
+                }
+
+                document.getElementById('code').value = decoded;
+                markDirty();
+                prettifyCode();
+            } catch (e) {
+                alert('Error reversing bookmarklet: ' + e.message);
+            }
         }
 
         // Update character count

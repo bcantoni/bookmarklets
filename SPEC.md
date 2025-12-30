@@ -48,11 +48,12 @@ Title should be user editable.
 
 Code should be user editable in an expandable multi-line text area. The text area should use a lightweight syntax highlighter for JavaScript (e.g., Highlight.js or Prism.js).
 
-Output should be a read-only text area displaying the generated bookmarklet code. Below the output, display a dynamic character count that turns red if it exceeds 2000 characters (some browsers have URL length limits).
+Output should be an editable text area displaying the generated bookmarklet code. Below the output, display a dynamic character count that turns red if it exceeds 2000 characters (some browsers have URL length limits).
 
 The following action buttons should be present in a row after Output:
 
 - Generate Bookmarklet - convert the code field to the output field.
+- Reverse - decode the output field back to JavaScript and place it in the code field (reverses the bookmarklet conversion process).
 - Run Code - execute the current contents of the output field in the current page context.
 - Pretty - prettify (clean up) the code field using a lightweight formatting approach.
 - Clear - clear the code field.
