@@ -373,6 +373,27 @@
             display: none;
         }
 
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .toast.visible {
+            opacity: 1;
+        }
+
         /* Timestamps */
         .timestamps {
             margin-top: 20px;
@@ -454,6 +475,7 @@
     </div>
 
     <input type="file" id="import-input" accept=".json" onchange="handleImport(event)">
+    <div class="toast" id="toast"></div>
 
     <script>
         // State
@@ -493,6 +515,16 @@
 
         function saveToStorage() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarklets));
+        }
+
+        // Toast notification
+        function showToast(message, duration = 2000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('visible');
+            setTimeout(() => {
+                toast.classList.remove('visible');
+            }, duration);
         }
 
         // UUID generator
@@ -887,7 +919,7 @@
 
             try {
                 await navigator.clipboard.writeText(output);
-                alert('Copied to clipboard!');
+                showToast('Copied to clipboard!');
             } catch (e) {
                 // Fallback for older browsers
                 const textarea = document.createElement('textarea');
@@ -896,7 +928,7 @@
                 textarea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
-                alert('Copied to clipboard!');
+                showToast('Copied to clipboard!');
             }
         }
 
