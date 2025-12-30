@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bookmarklets</title>
+    <title>Bookmarklets by Brian Cantoni</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
@@ -40,8 +40,23 @@
 
         .left-panel-header h2 {
             font-size: 14px;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             color: #333;
+        }
+
+        .left-panel-header .byline {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .left-panel-header .byline a {
+            color: #4a90d9;
+            text-decoration: none;
+        }
+
+        .left-panel-header .byline a:hover {
+            text-decoration: underline;
         }
 
         .btn-new {
@@ -376,6 +391,7 @@
     <div class="left-panel">
         <div class="left-panel-header">
             <h2>Bookmarklets</h2>
+            <p class="byline">by Brian Cantoni (<a href="https://github.com/bcantoni/bookmarklets" target="_blank" rel="noopener">GitHub repo</a>)</p>
             <button class="btn-new" onclick="createNew()">+ New</button>
         </div>
         <div class="bookmarklet-list" id="bookmarklet-list"></div>
