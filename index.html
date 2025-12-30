@@ -727,6 +727,7 @@
 
         // Run code in current page context
         function runCode() {
+            generateBookmarklet();
             const output = document.getElementById('output').value;
             if (!output) {
                 alert('Please generate the bookmarklet first.');
