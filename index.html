@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmarklets</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Left Panel */
+        .left-panel {
+            width: 200px;
+            min-width: 200px;
+            background: #f5f5f5;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .left-panel-header {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            background: #fff;
+        }
+
+        .left-panel-header h2 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .btn-new {
+            width: 100%;
+            padding: 8px 12px;
+            background: #4a90d9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-new:hover {
+            background: #3a7bc8;
+        }
+
+        .bookmarklet-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+        .bookmarklet-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bookmarklet-item:hover {
+            background: #e8e8e8;
+        }
+
+        .bookmarklet-item.selected {
+            background: #4a90d9;
+            color: white;
+        }
+
+        .left-panel-footer {
+            padding: 12px;
+            border-top: 1px solid #ddd;
+            background: #fff;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-io {
+            flex: 1;
+            padding: 6px 8px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-io:hover {
+            background: #5a6268;
+        }
+
+        /* Right Panel */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .editor-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .getting-started {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+            text-align: center;
+        }
+
+        .getting-started h2 {
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .getting-started p {
+            max-width: 400px;
+            line-height: 1.6;
+        }
+
+        .editor {
+            display: none;
+            max-width: 900px;
+        }
+
+        .editor.visible {
+            display: block;
+        }
+
+        .field-group {
+            margin-bottom: 20px;
+        }
+
+        .field-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .field-group input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .field-group input[type="text"]:focus {
+            outline: none;
+            border-color: #4a90d9;
+            box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.2);
+        }
+
+        /* Code editor with syntax highlighting */
+        .code-editor-wrapper {
+            position: relative;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .code-editor-wrapper:focus-within {
+            border-color: #4a90d9;
+            box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.2);
+        }
+
+        .code-editor {
+            width: 100%;
+            min-height: 200px;
+            padding: 12px;
+            border: none;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            resize: vertical;
+            background: #fff;
+        }
+
+        .code-editor:focus {
+            outline: none;
+        }
+
+        .code-highlight {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 12px;
+            pointer-events: none;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        .output-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            resize: vertical;
+            background: #f9f9f9;
+            color: #555;
+        }
+
+        .char-count {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .char-count.warning {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #4a90d9;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3a7bc8;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        /* Bookmarklet link */
+        .bookmarklet-link-section {
+            padding: 16px;
+            background: #f0f7ff;
+            border: 1px solid #b8daff;
+            border-radius: 4px;
+        }
+
+        .bookmarklet-link-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .bookmarklet-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #4a90d9;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: grab;
+        }
+
+        .bookmarklet-link:hover {
+            background: #3a7bc8;
+        }
+
+        .bookmarklet-link.disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .drag-hint {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Hidden file input */
+        #import-input {
+            display: none;
+        }
+
+        /* Timestamps */
+        .timestamps {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .timestamps span {
+            margin-right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="left-panel-header">
+            <h2>Bookmarklets</h2>
+            <button class="btn-new" onclick="createNew()">+ New</button>
+        </div>
+        <div class="bookmarklet-list" id="bookmarklet-list"></div>
+        <div class="left-panel-footer">
+            <button class="btn-io" onclick="importBookmarklets()">Import</button>
+            <button class="btn-io" onclick="exportBookmarklets()">Export</button>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="editor-container">
+            <div class="getting-started" id="getting-started">
+                <h2>Getting Started</h2>
+                <p>Welcome to Bookmarklets! Click the <strong>+ New</strong> button in the left panel to create your first bookmarklet.</p>
+                <p style="margin-top: 12px;">Bookmarklets are small JavaScript programs that run in your browser. You can drag them to your bookmarks bar for quick access.</p>
+            </div>
+
+            <div class="editor" id="editor">
+                <div class="field-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" placeholder="My Bookmarklet" oninput="markDirty()">
+                </div>
+
+                <div class="field-group">
+                    <label for="code">Code</label>
+                    <div class="code-editor-wrapper">
+                        <textarea class="code-editor" id="code" placeholder="// Enter your JavaScript code here" oninput="markDirty(); updateHighlight()"></textarea>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label for="output">Output</label>
+                    <textarea class="output-textarea" id="output" readonly placeholder="Click 'Generate Bookmarklet' to see the output"></textarea>
+                    <div class="char-count" id="char-count">0 characters</div>
+                </div>
+
+                <div class="button-row">
+                    <button class="btn btn-primary" onclick="generateBookmarklet()">Generate Bookmarklet</button>
+                    <button class="btn btn-warning" onclick="runCode()">Run Code</button>
+                    <button class="btn btn-secondary" onclick="prettifyCode()">Pretty</button>
+                    <button class="btn btn-secondary" onclick="clearCode()">Clear</button>
+                    <button class="btn btn-success" onclick="saveBookmarklet()">Save</button>
+                    <button class="btn btn-danger" onclick="deleteBookmarklet()">Delete</button>
+                    <button class="btn btn-secondary" onclick="copyToClipboard()">Copy to Clipboard</button>
+                </div>
+
+                <div class="bookmarklet-link-section">
+                    <label>Drag to Bookmarks Bar</label>
+                    <a class="bookmarklet-link disabled" id="bookmarklet-drag-link" href="javascript:void(0)">Bookmarklet</a>
+                    <p class="drag-hint">Drag this link to your bookmarks bar to install the bookmarklet.</p>
+                </div>
+
+                <div class="timestamps" id="timestamps" style="display: none;">
+                    <span id="created-time"></span>
+                    <span id="modified-time"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="import-input" accept=".json" onchange="handleImport(event)">
+
+    <script>
+        // State
+        let bookmarklets = [];
+        let currentId = null;
+        let isDirty = false;
+
+        // Local Storage Key
+        const STORAGE_KEY = 'bookmarklets';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFromStorage();
+            renderList();
+
+            // Warn before leaving page with unsaved changes
+            window.addEventListener('beforeunload', (e) => {
+                if (isDirty) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            });
+        });
+
+        // Storage functions
+        function loadFromStorage() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) {
+                try {
+                    bookmarklets = JSON.parse(data);
+                } catch (e) {
+                    console.error('Failed to parse bookmarklets:', e);
+                    bookmarklets = [];
+                }
+            }
+        }
+
+        function saveToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarklets));
+        }
+
+        // UUID generator
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Render bookmarklet list
+        function renderList() {
+            const list = document.getElementById('bookmarklet-list');
+            list.innerHTML = '';
+
+            bookmarklets.forEach(bm => {
+                const item = document.createElement('div');
+                item.className = 'bookmarklet-item' + (bm.id === currentId ? ' selected' : '');
+                item.textContent = bm.title || 'Untitled';
+                item.onclick = () => selectBookmarklet(bm.id);
+                list.appendChild(item);
+            });
+        }
+
+        // Check for unsaved changes before navigating
+        function checkUnsavedChanges() {
+            if (isDirty) {
+                return confirm('You have unsaved changes. Do you want to discard them?');
+            }
+            return true;
+        }
+
+        // Create new bookmarklet
+        function createNew() {
+            if (!checkUnsavedChanges()) return;
+
+            currentId = null;
+            isDirty = false;
+
+            document.getElementById('title').value = '';
+            document.getElementById('code').value = '';
+            document.getElementById('output').value = '';
+            updateCharCount();
+            updateDragLink('');
+
+            document.getElementById('getting-started').style.display = 'none';
+            document.getElementById('editor').classList.add('visible');
+            document.getElementById('timestamps').style.display = 'none';
+
+            renderList();
+            document.getElementById('title').focus();
+        }
+
+        // Select existing bookmarklet
+        function selectBookmarklet(id) {
+            if (!checkUnsavedChanges()) return;
+
+            const bm = bookmarklets.find(b => b.id === id);
+            if (!bm) return;
+
+            currentId = id;
+            isDirty = false;
+
+            document.getElementById('title').value = bm.title || '';
+            document.getElementById('code').value = bm.code || '';
+            document.getElementById('output').value = bm.output || '';
+            updateCharCount();
+            updateDragLink(bm.output || '');
+
+            document.getElementById('getting-started').style.display = 'none';
+            document.getElementById('editor').classList.add('visible');
+
+            // Show timestamps
+            const timestamps = document.getElementById('timestamps');
+            if (bm.created || bm.modified) {
+                timestamps.style.display = 'block';
+                document.getElementById('created-time').textContent = bm.created ?
+                    'Created: ' + new Date(bm.created).toLocaleString() : '';
+                document.getElementById('modified-time').textContent = bm.modified ?
+                    'Modified: ' + new Date(bm.modified).toLocaleString() : '';
+            } else {
+                timestamps.style.display = 'none';
+            }
+
+            renderList();
+        }
+
+        // Mark as dirty (unsaved changes)
+        function markDirty() {
+            isDirty = true;
+        }
+
+        // Simple JavaScript minifier that preserves strings
+        function minifyJS(code) {
+            // Extract strings and replace with placeholders
+            const strings = [];
+            const stringPattern = /(["'`])(?:(?!\1|\\).|\\.)*\1/g;
+
+            let preserved = code.replace(stringPattern, (match) => {
+                strings.push(match);
+                return `__STRING_${strings.length - 1}__`;
+            });
+
+            // Now minify the code without strings
+            preserved = preserved
+                // Remove single-line comments
+                .replace(/\/\/.*$/gm, '')
+                // Remove multi-line comments
+                .replace(/\/\*[\s\S]*?\*\//g, '')
+                // Remove leading/trailing whitespace from lines
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0)
+                .join(' ')
+                // Collapse multiple spaces
+                .replace(/\s+/g, ' ')
+                // Remove spaces around operators and punctuation
+                .replace(/\s*([{}();,=+\-*/<>!&|?:])\s*/g, '$1')
+                // Add back necessary spaces around keywords
+                .replace(/\b(var|let|const|return|if|else|for|while|function|new|typeof|instanceof|in|of)\b/g, ' $1 ')
+                // Clean up extra spaces
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            // Restore strings
+            preserved = preserved.replace(/__STRING_(\d+)__/g, (match, index) => {
+                return strings[parseInt(index)];
+            });
+
+            return preserved;
+        }
+
+        // Generate bookmarklet
+        function generateBookmarklet() {
+            const code = document.getElementById('code').value;
+            if (!code.trim()) {
+                document.getElementById('output').value = '';
+                updateCharCount();
+                updateDragLink('');
+                return;
+            }
+
+            // Minify
+            const minified = minifyJS(code);
+
+            // Wrap in IIFE
+            const wrapped = '(function(){' + minified + '})()';
+
+            // URL encode and add javascript: prefix
+            const encoded = 'javascript:' + encodeURIComponent(wrapped);
+
+            document.getElementById('output').value = encoded;
+            updateCharCount();
+            updateDragLink(encoded);
+        }
+
+        // Update character count
+        function updateCharCount() {
+            const output = document.getElementById('output').value;
+            const count = output.length;
+            const charCount = document.getElementById('char-count');
+            charCount.textContent = count + ' characters';
+
+            if (count > 2000) {
+                charCount.classList.add('warning');
+            } else {
+                charCount.classList.remove('warning');
+            }
+        }
+
+        // Update drag link
+        function updateDragLink(href) {
+            const link = document.getElementById('bookmarklet-drag-link');
+            const title = document.getElementById('title').value || 'Bookmarklet';
+
+            if (href && href.startsWith('javascript:')) {
+                link.href = href;
+                link.textContent = title;
+                link.classList.remove('disabled');
+            } else {
+                link.href = 'javascript:void(0)';
+                link.textContent = 'Bookmarklet';
+                link.classList.add('disabled');
+            }
+        }
+
+        // Run code in current page context
+        function runCode() {
+            const output = document.getElementById('output').value;
+            if (!output) {
+                alert('Please generate the bookmarklet first.');
+                return;
+            }
+
+            try {
+                // Extract the code from javascript: prefix and decode
+                const encoded = output.replace(/^javascript:/, '');
+                const decoded = decodeURIComponent(encoded);
+                eval(decoded);
+            } catch (e) {
+                alert('Error running code: ' + e.message);
+            }
+        }
+
+        // Simple prettify (basic formatting)
+        function prettifyCode() {
+            const code = document.getElementById('code').value;
+            if (!code.trim()) return;
+
+            let formatted = code;
+            let indent = 0;
+            const indentStr = '  ';
+
+            // Split by common delimiters while preserving them
+            const tokens = code.split(/([{};\n])/);
+            let result = '';
+            let newLine = true;
+
+            for (let i = 0; i < tokens.length; i++) {
+                const token = tokens[i];
+
+                if (token === '{') {
+                    result += ' {\n';
+                    indent++;
+                    newLine = true;
+                } else if (token === '}') {
+                    indent = Math.max(0, indent - 1);
+                    if (!newLine) result += '\n';
+                    result += indentStr.repeat(indent) + '}';
+                    newLine = false;
+                } else if (token === ';') {
+                    result += ';\n';
+                    newLine = true;
+                } else if (token === '\n') {
+                    if (!newLine) {
+                        result += '\n';
+                        newLine = true;
+                    }
+                } else if (token.trim()) {
+                    if (newLine) {
+                        result += indentStr.repeat(indent);
+                    }
+                    result += token.trim();
+                    newLine = false;
+                }
+            }
+
+            document.getElementById('code').value = result.trim();
+            markDirty();
+        }
+
+        // Clear code
+        function clearCode() {
+            if (document.getElementById('code').value && !confirm('Clear all code?')) {
+                return;
+            }
+            document.getElementById('code').value = '';
+            document.getElementById('output').value = '';
+            updateCharCount();
+            updateDragLink('');
+            markDirty();
+        }
+
+        // Save bookmarklet
+        function saveBookmarklet() {
+            const title = document.getElementById('title').value.trim() || 'Untitled';
+            const code = document.getElementById('code').value;
+            const output = document.getElementById('output').value;
+
+            const now = new Date().toISOString();
+
+            if (currentId) {
+                // Update existing
+                const index = bookmarklets.findIndex(b => b.id === currentId);
+                if (index !== -1) {
+                    bookmarklets[index].title = title;
+                    bookmarklets[index].code = code;
+                    bookmarklets[index].output = output;
+                    bookmarklets[index].modified = now;
+                }
+            } else {
+                // Create new
+                const newBookmarklet = {
+                    id: generateUUID(),
+                    title: title,
+                    code: code,
+                    output: output,
+                    created: now,
+                    modified: now
+                };
+                bookmarklets.push(newBookmarklet);
+                currentId = newBookmarklet.id;
+            }
+
+            saveToStorage();
+            isDirty = false;
+            renderList();
+
+            // Update timestamps display
+            const bm = bookmarklets.find(b => b.id === currentId);
+            if (bm) {
+                const timestamps = document.getElementById('timestamps');
+                timestamps.style.display = 'block';
+                document.getElementById('created-time').textContent = 'Created: ' + new Date(bm.created).toLocaleString();
+                document.getElementById('modified-time').textContent = 'Modified: ' + new Date(bm.modified).toLocaleString();
+            }
+
+            // Update drag link title
+            updateDragLink(output);
+        }
+
+        // Delete bookmarklet
+        function deleteBookmarklet() {
+            if (!currentId) {
+                // Just clear the form for unsaved bookmarklet
+                document.getElementById('getting-started').style.display = 'flex';
+                document.getElementById('editor').classList.remove('visible');
+                isDirty = false;
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this bookmarklet?')) {
+                return;
+            }
+
+            bookmarklets = bookmarklets.filter(b => b.id !== currentId);
+            saveToStorage();
+
+            currentId = null;
+            isDirty = false;
+
+            document.getElementById('getting-started').style.display = 'flex';
+            document.getElementById('editor').classList.remove('visible');
+
+            renderList();
+        }
+
+        // Copy to clipboard
+        async function copyToClipboard() {
+            const output = document.getElementById('output').value;
+            if (!output) {
+                alert('Nothing to copy. Generate a bookmarklet first.');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(output);
+                alert('Copied to clipboard!');
+            } catch (e) {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = output;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('Copied to clipboard!');
+            }
+        }
+
+        // Import bookmarklets
+        function importBookmarklets() {
+            document.getElementById('import-input').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (!Array.isArray(imported)) {
+                        throw new Error('Invalid format');
+                    }
+
+                    // Validate and assign new IDs to avoid conflicts
+                    const newBookmarklets = imported.map(bm => ({
+                        id: generateUUID(),
+                        title: bm.title || 'Untitled',
+                        code: bm.code || '',
+                        output: bm.output || '',
+                        created: bm.created || new Date().toISOString(),
+                        modified: bm.modified || new Date().toISOString()
+                    }));
+
+                    bookmarklets = [...bookmarklets, ...newBookmarklets];
+                    saveToStorage();
+                    renderList();
+                    alert('Imported ' + newBookmarklets.length + ' bookmarklet(s).');
+                } catch (err) {
+                    alert('Failed to import: Invalid JSON format.');
+                }
+            };
+            reader.readAsText(file);
+
+            // Reset input
+            event.target.value = '';
+        }
+
+        // Export bookmarklets
+        function exportBookmarklets() {
+            if (bookmarklets.length === 0) {
+                alert('No bookmarklets to export.');
+                return;
+            }
+
+            const data = JSON.stringify(bookmarklets, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'bookmarklets.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Syntax highlighting (simplified approach)
+        function updateHighlight() {
+            // For simplicity, we're using a plain textarea
+            // Full syntax highlighting would require a more complex setup
+            // like CodeMirror or a contenteditable div with highlighting
+        }
+    </script>
+</body>
+</html>
