@@ -4,6 +4,8 @@ A simple web application for creating, editing, and managing browser bookmarklet
 
 **Live site:** <https://bcantoni.github.io/bookmarklets/>
 
+![Bookmarklets web app screenshot](screenshot.png)
+
 ## Features
 
 - **Create & Edit Bookmarklets** - Write JavaScript code and convert it to bookmarklet format
