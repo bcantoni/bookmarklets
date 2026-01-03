@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.1/beautify.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -796,52 +797,26 @@
             }
         }
 
-        // Simple prettify (basic formatting)
+        // Prettify code using js-beautify
         function prettifyCode() {
             const code = document.getElementById('code').value;
             if (!code.trim()) return;
 
-            let formatted = code;
-            let indent = 0;
-            const indentStr = '  ';
+            try {
+                const formatted = js_beautify(code, {
+                    indent_size: 2,
+                    space_in_empty_paren: false,
+                    preserve_newlines: true,
+                    max_preserve_newlines: 2,
+                    end_with_newline: false
+                });
 
-            // Split by common delimiters while preserving them
-            const tokens = code.split(/([{};\n])/);
-            let result = '';
-            let newLine = true;
-
-            for (let i = 0; i < tokens.length; i++) {
-                const token = tokens[i];
-
-                if (token === '{') {
-                    result += ' {\n';
-                    indent++;
-                    newLine = true;
-                } else if (token === '}') {
-                    indent = Math.max(0, indent - 1);
-                    if (!newLine) result += '\n';
-                    result += indentStr.repeat(indent) + '}';
-                    newLine = false;
-                } else if (token === ';') {
-                    result += ';\n';
-                    newLine = true;
-                } else if (token === '\n') {
-                    if (!newLine) {
-                        result += '\n';
-                        newLine = true;
-                    }
-                } else if (token.trim()) {
-                    if (newLine) {
-                        result += indentStr.repeat(indent);
-                    }
-                    result += token.trim();
-                    newLine = false;
-                }
+                document.getElementById('code').value = formatted;
+                markDirty();
+                updateHighlight();
+            } catch (e) {
+                showToast('Error formatting code: ' + e.message);
             }
-
-            document.getElementById('code').value = result.trim();
-            markDirty();
-            updateHighlight();
         }
 
         // Clear code

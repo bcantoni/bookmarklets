@@ -4,6 +4,8 @@ A simple web application for creating, editing, and managing browser bookmarklet
 
 **Live site:** <https://bcantoni.github.io/bookmarklets/>
 
+**Blog post:** <https://www.cantoni.org/2025/12/30/modern-browser-bookmarklets/>
+
 ![Bookmarklets web app screenshot](screenshot.png)
 
 ## Features
@@ -30,6 +32,7 @@ The bookmarklet conversion process:
 - Single HTML file with embedded CSS and JavaScript
 - Vanilla JavaScript (no frameworks)
 - [Highlight.js](https://highlightjs.org/) for syntax highlighting
+- [js-beautify](https://beautifier.io/) for code formatting
 - Browser localStorage for persistence
 - Hosted on GitHub Pages
 
