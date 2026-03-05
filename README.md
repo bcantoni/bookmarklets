@@ -1,6 +1,6 @@
 # Bookmarklets
 
-A simple web application for creating, editing, and managing browser bookmarklets.
+Supercharge your browser with custom bookmarklets — tiny JavaScript programs that live in your bookmarks bar and run with a single click. Build them, decode existing ones, and manage your whole collection, all without installing anything.
 
 **Live site:** <https://bcantoni.github.io/bookmarklets/>
 
