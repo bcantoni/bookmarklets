@@ -351,6 +351,64 @@
             background: #e0a800;
         }
 
+        /* Help icon */
+        .help-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #6c757d;
+            color: white;
+            font-size: 14px;
+            font-weight: 400;
+            cursor: default;
+            user-select: none;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .help-popup {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            right: 0;
+            background: white;
+            color: #212529;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 12px 16px;
+            min-width: 340px;
+            z-index: 100;
+        }
+
+        .help-popup.visible {
+            display: block;
+        }
+
+        .help-popup table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 13px;
+        }
+
+        .help-popup td {
+            padding: 4px 8px 4px 0;
+            vertical-align: top;
+        }
+
+        .help-popup td:first-child {
+            font-weight: 600;
+            white-space: nowrap;
+            padding-right: 12px;
+        }
+
+        .help-popup tr:not(:last-child) td {
+            border-bottom: 1px solid #f0f0f0;
+        }
+
         /* Bookmarklet link */
         .bookmarklet-link-section {
             padding: 16px;
@@ -486,6 +544,20 @@
                     <button class="btn btn-success" onclick="saveBookmarklet()">Save</button>
                     <button class="btn btn-danger" onclick="deleteBookmarklet()">Delete</button>
                     <button class="btn btn-secondary" onclick="copyToClipboard()">Copy to Clipboard</button>
+                    <div class="help-icon" id="help-icon">?
+                        <div class="help-popup" id="help-popup">
+                            <table>
+                                <tr><td>Generate Bookmarklet</td><td>Converts your code into a <code>javascript:</code> bookmarklet link (Code &rarr; Output)</td></tr>
+                                <tr><td>Reverse</td><td>Extracts source code from an existing bookmarklet link (Output &rarr; Code)</td></tr>
+                                <tr><td>Run Code</td><td>Executes the current code directly in this browser tab</td></tr>
+                                <tr><td>Pretty</td><td>Formats and beautifies the code for readability</td></tr>
+                                <tr><td>Clear</td><td>Clears the code editor</td></tr>
+                                <tr><td>Save</td><td>Saves the current bookmarklet to local storage</td></tr>
+                                <tr><td>Delete</td><td>Deletes the current bookmarklet</td></tr>
+                                <tr><td>Copy to Clipboard</td><td>Copies the generated bookmarklet link to the clipboard</td></tr>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="bookmarklet-link-section">
@@ -937,6 +1009,24 @@
                 showToast('Copied to clipboard!');
             }
         }
+
+        // Help icon hover with delay
+        (function() {
+            let showTimer = null;
+            let hideTimer = null;
+            const icon = document.getElementById('help-icon');
+            const popup = document.getElementById('help-popup');
+
+            icon.addEventListener('mouseenter', () => {
+                clearTimeout(hideTimer);
+                showTimer = setTimeout(() => popup.classList.add('visible'), 200);
+            });
+
+            icon.addEventListener('mouseleave', () => {
+                clearTimeout(showTimer);
+                hideTimer = setTimeout(() => popup.classList.remove('visible'), 150);
+            });
+        })();
 
         // Import bookmarklets
         function importBookmarklets() {
