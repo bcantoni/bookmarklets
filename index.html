@@ -24,7 +24,7 @@
 
         /* Left Panel */
         .left-panel {
-            width: 200px;
+            width: 250px;
             min-width: 200px;
             background: #f5f5f5;
             border-right: 1px solid #ddd;
@@ -34,20 +34,21 @@
         }
 
         .left-panel-header {
-            padding: 12px;
+            padding: 14px;
             border-bottom: 1px solid #ddd;
             background: #fff;
         }
 
-        .left-panel-header h2 {
-            font-size: 14px;
+        .left-panel-header h1 {
+            font-size: 18px;
+            margin-top: 0.5em;
             margin-bottom: 4px;
             color: #333;
         }
 
         .left-panel-header .byline {
-            font-size: 11px;
-            color: #666;
+            font-size: 13px;
+            color: #333;
             margin-bottom: 10px;
         }
 
@@ -61,8 +62,8 @@
         }
 
         .privacy-note {
-            font-size: 10px;
-            color: #666;
+            font-size: 13px;
+            color: #333;
             margin-bottom: 10px;
             line-height: 1.4;
         }
@@ -75,7 +76,7 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 15px;
         }
 
         .btn-new:hover {
@@ -92,7 +93,7 @@
             padding: 10px 12px;
             cursor: pointer;
             border-bottom: 1px solid #eee;
-            font-size: 13px;
+            font-size: 15px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -108,7 +109,7 @@
         }
 
         .left-panel-footer {
-            padding: 12px;
+            padding: 14px;
             border-top: 1px solid #ddd;
             background: #fff;
             display: flex;
@@ -123,7 +124,7 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 15px;
         }
 
         .btn-io:hover {
@@ -151,7 +152,7 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: #666;
+            color: #333;
             text-align: center;
         }
 
@@ -281,7 +282,7 @@
         .char-count {
             margin-top: 6px;
             font-size: 12px;
-            color: #666;
+            color: #333;
         }
 
         .char-count.warning {
@@ -449,7 +450,7 @@
         .drag-hint {
             margin-top: 8px;
             font-size: 12px;
-            color: #666;
+            color: #333;
         }
 
         /* Hidden file input */
@@ -495,7 +496,7 @@
 <body>
     <div class="left-panel">
         <div class="left-panel-header">
-            <h2>Bookmarklets</h2>
+            <h1>Bookmarklets</h1>
             <p class="byline">by Brian Cantoni (<a href="https://github.com/bcantoni/bookmarklets" target="_blank" rel="noopener">GitHub repo</a>)</p>
             <p class="privacy-note">100% client-side. Your data stays in your browser.</p>
             <button class="btn-new" onclick="createNew()">+ New</button>
@@ -507,7 +508,7 @@
         </div>
     </div>
 
-    <div class="right-panel">
+    <main class="right-panel">
         <div class="editor-container">
             <div class="getting-started" id="getting-started">
                 <h2>Getting Started</h2>
@@ -572,7 +573,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <input type="file" id="import-input" accept=".json" onchange="handleImport(event)">
     <div class="toast" id="toast"></div>
